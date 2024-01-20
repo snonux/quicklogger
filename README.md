@@ -1,6 +1,6 @@
 # quicklogger
 
-![Quicklogger](./logo.png)
+![Quicklogger](./logo-small.png)
 
 This is a tiny GUI app written in Go using the Fyne framework to quickly log a message to a file.
 
