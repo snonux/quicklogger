@@ -14,29 +14,33 @@ import (
 )
 
 func main() {
-	myApp := app.New()
+	myApp := app.NewWithID("org.buetow.quicklogger")
 	myWindow := myApp.NewWindow("Quick logger")
 
+	storageDir := fyne.CurrentApp().Storage().RootURI().Path()
+	label := widget.NewLabel(storageDir)
+
 	input := widget.NewMultiLineEntry()
-	input.SetPlaceHolder("Enter text here...")
+	input.SetPlaceHolder("Enter text here.")
 
 	button := widget.NewButton("Log text", func() {
 		content := input.Text
-		filename := fmt.Sprintf("%s.txt", getSHA256Hash(content))
+		filename := fmt.Sprintf("%s/quicklog-%s.txt", storageDir, getSHA256Hash(content))
 		err := os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			log.Println("Error writing to file:", err)
+			input.SetText(err.Error())
 		} else {
 			input.SetText("")
 		}
 	})
 
 	myWindow.SetContent(container.NewVBox(
+		label,
 		input,
 		button,
 	))
 	myWindow.Resize(fyne.NewSize(200, 100))
-
 	myWindow.ShowAndRun()
 }
 
