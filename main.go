@@ -15,17 +15,16 @@ import (
 
 func main() {
 	a := app.NewWithID("org.buetow.quicklogger")
-	myWindow := a.NewWindow("Quick logger")
-
+	w := a.NewWindow("Quick logger")
+	// Same dir as my Obsidian
 	storageDir := "/storage/emulated/0/Notes/Vault"
-	label := widget.NewLabel(storageDir)
 
 	input := widget.NewMultiLineEntry()
 	input.SetPlaceHolder("Enter text here!")
 
 	button := widget.NewButton("Log text", func() {
 		content := input.Text
-		filename := fmt.Sprintf("%s/quicklog-%s.txt", storageDir, getSHA256Hash(content))
+		filename := fmt.Sprintf("%s/quicklog-%s.md", storageDir, getSHA256Hash(content))
 		err := os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			log.Println("Error writing to file:", err)
@@ -35,13 +34,13 @@ func main() {
 		}
 	})
 
-	myWindow.SetContent(container.NewVBox(
-		label,
+	w.SetContent(container.NewVBox(
+		widget.NewLabel("To be in the .zone!"),
 		input,
 		button,
 	))
-	myWindow.Resize(fyne.NewSize(200, 100))
-	myWindow.ShowAndRun()
+	w.Resize(fyne.NewSize(200, 100))
+	w.ShowAndRun()
 }
 
 func getSHA256Hash(text string) string {
