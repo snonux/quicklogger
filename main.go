@@ -14,14 +14,14 @@ import (
 )
 
 func main() {
-	myApp := app.NewWithID("org.buetow.quicklogger")
-	myWindow := myApp.NewWindow("Quick logger")
+	a := app.NewWithID("org.buetow.quicklogger")
+	myWindow := a.NewWindow("Quick logger")
 
-	storageDir := fyne.CurrentApp().Storage().RootURI().Path()
+	storageDir := "/storage/emulated/0/Notes/Vault"
 	label := widget.NewLabel(storageDir)
 
 	input := widget.NewMultiLineEntry()
-	input.SetPlaceHolder("Enter text here.")
+	input.SetPlaceHolder("Enter text here!")
 
 	button := widget.NewButton("Log text", func() {
 		content := input.Text
