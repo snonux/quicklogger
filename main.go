@@ -12,35 +12,66 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func main() {
-	a := app.NewWithID("org.buetow.quicklogger")
-	a.Preferences().SetString("Directory", "/storage/emulated/0/Notes/Vault")
-	w := a.NewWindow("Quick logger")
+const (
+	appId            = "org.buetow.quicklogger"
+	defaultDirectory = "."
+)
 
-	// Same dir as my Obsidian
-	storageDir := a.Preferences().String("Directory")
+var windowSize = fyne.NewSize(200, 100)
+
+func createPreferenceWindow(a fyne.App) fyne.Window {
+	window := a.NewWindow("Preferences")
+	window.Resize(windowSize)
+	directoryPreference := widget.NewEntry()
+	directoryPreference.SetText(a.Preferences().StringWithFallback("Directory", defaultDirectory))
+
+	saveButton := widget.NewButton("Save", func() {
+		a.Preferences().SetString("Directory", directoryPreference.Text)
+		window.Hide()
+	})
+
+	preferencesContent := container.NewVBox(
+		widget.NewLabel("Directory"),
+		directoryPreference,
+		saveButton,
+	)
+	window.SetContent(preferencesContent)
+
+	return window
+}
+
+func createMainWindow(a fyne.App) fyne.Window {
+	window := a.NewWindow("Quick logger")
 
 	input := widget.NewMultiLineEntry()
 	input.Wrapping = fyne.TextWrapWord
-	input.SetPlaceHolder("Enter text here!")
+	input.SetPlaceHolder("Enter text here...")
 
 	button := widget.NewButton("Log text", func() {
-		content := input.Text
-		filename := fmt.Sprintf("%s/ql-%s.md", storageDir, time.Now().Format("060102-150405"))
-		err := os.WriteFile(filename, []byte(content), 0644)
+		filename := fmt.Sprintf("%s/ql-%s.md",
+			a.Preferences().StringWithFallback("Directory", defaultDirectory),
+			time.Now().Format("060102-150405"))
+		err := os.WriteFile(filename, []byte(input.Text), 0644)
 		if err != nil {
-			dialog.ShowError(err, w)
-		} else {
-			input.SetText("")
+			dialog.ShowError(err, window)
+			return
 		}
+		input.SetText("")
 	})
 
-	w.SetContent(container.NewVBox(
-		widget.NewLabel("To be in the .zone!"),
+	window.SetContent(container.NewVBox(
 		input,
 		button,
+		widget.NewButton("Preferences", func() {
+			createPreferenceWindow(a).Show()
+		}),
 	))
-	w.Resize(fyne.NewSize(200, 100))
-	w.Canvas().Focus(input)
-	w.ShowAndRun()
+	window.Resize(windowSize)
+	window.Canvas().Focus(input)
+
+	return window
+}
+
+func main() {
+	createMainWindow(app.NewWithID(appId)).ShowAndRun()
 }
