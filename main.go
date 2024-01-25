@@ -19,7 +19,7 @@ const (
 
 var windowSize = fyne.NewSize(200, 100)
 
-func createPreferenceWindow(a fyne.App) fyne.Window {
+func createPreferenceWindow(a fyne.App, mainWindow fyne.Window) fyne.Window {
 	window := a.NewWindow("Preferences")
 	window.Resize(windowSize)
 	directoryPreference := widget.NewEntry()
@@ -28,6 +28,7 @@ func createPreferenceWindow(a fyne.App) fyne.Window {
 	saveButton := widget.NewButton("Save", func() {
 		a.Preferences().SetString("Directory", directoryPreference.Text)
 		window.Hide()
+		mainWindow.Show()
 	})
 
 	preferencesContent := container.NewVBox(
@@ -63,7 +64,7 @@ func createMainWindow(a fyne.App) fyne.Window {
 		input,
 		button,
 		widget.NewButton("Preferences", func() {
-			createPreferenceWindow(a).Show()
+			createPreferenceWindow(a, window).Show()
 		}),
 	))
 	window.Resize(windowSize)
