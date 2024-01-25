@@ -47,9 +47,10 @@ func createMainWindow(a fyne.App) fyne.Window {
 	button := widget.NewButton("Log text", func() {
 		filename := fmt.Sprintf("%s/ql-%s.md",
 			a.Preferences().StringWithFallback("Directory", defaultDirectory),
-			time.Now().Format("060102-150405"))
-		err := os.WriteFile(filename, []byte(input.Text), 0644)
-		if err != nil {
+			time.Now().Format("060102-150405"),
+		)
+
+		if err := os.WriteFile(filename, []byte(input.Text), 0644); err != nil {
 			dialog.ShowError(err, window)
 			return
 		}
