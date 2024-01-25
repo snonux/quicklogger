@@ -14,9 +14,11 @@ import (
 
 func main() {
 	a := app.NewWithID("org.buetow.quicklogger")
+	a.Preferences().SetString("Directory", "/storage/emulated/0/Notes/Vault")
 	w := a.NewWindow("Quick logger")
+
 	// Same dir as my Obsidian
-	storageDir := "/storage/emulated/0/Notes/Vault"
+	storageDir := a.Preferences().String("Directory")
 
 	input := widget.NewMultiLineEntry()
 	input.SetPlaceHolder("Enter text here!")
