@@ -1,11 +1,10 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -24,7 +23,7 @@ func main() {
 
 	button := widget.NewButton("Log text", func() {
 		content := input.Text
-		filename := fmt.Sprintf("%s/quicklog-%s.md", storageDir, getSHA256Hash(content))
+		filename := fmt.Sprintf("%s/quicklog-%d.md", storageDir, time.Now().Unix())
 		err := os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			log.Println("Error writing to file:", err)
@@ -40,11 +39,6 @@ func main() {
 		button,
 	))
 	w.Resize(fyne.NewSize(200, 100))
+	w.Canvas().Focus(input)
 	w.ShowAndRun()
-}
-
-func getSHA256Hash(text string) string {
-	hasher := sha256.New()
-	hasher.Write([]byte(text))
-	return hex.EncodeToString(hasher.Sum(nil))
 }
