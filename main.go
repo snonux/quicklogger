@@ -21,6 +21,7 @@ func main() {
 	storageDir := a.Preferences().String("Directory")
 
 	input := widget.NewMultiLineEntry()
+	input.Wrapping = fyne.TextWrapWord
 	input.SetPlaceHolder("Enter text here!")
 
 	button := widget.NewButton("Log text", func() {
