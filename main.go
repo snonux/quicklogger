@@ -26,7 +26,7 @@ func main() {
 
 	button := widget.NewButton("Log text", func() {
 		content := input.Text
-		filename := fmt.Sprintf("%s/quicklog-%d.md", storageDir, time.Now().Unix())
+		filename := fmt.Sprintf("%s/ql-%s.md", storageDir, time.Now().Format("060102-150405"))
 		err := os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			dialog.ShowError(err, w)
