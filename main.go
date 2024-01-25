@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -26,8 +26,7 @@ func main() {
 		filename := fmt.Sprintf("%s/quicklog-%d.md", storageDir, time.Now().Unix())
 		err := os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
-			log.Println("Error writing to file:", err)
-			input.SetText(err.Error())
+			dialog.ShowError(err, w)
 		} else {
 			input.SetText("")
 		}
