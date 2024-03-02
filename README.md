@@ -6,9 +6,10 @@ This is a tiny GUI app written in Go using the Fyne framework to quickly log a m
 
 The purpose of this is to have a small Android app to quickly log Ideas into a folder as plain text files.  From there, Syncthing will sync it to my computer at home. 
 
-This is a screenshot of the App running on Fedora Linux. But it also works seamlessly on my Android phone.
+This are screenshots of the App running on Android and Fedora Linux.
 
-![Screenshot](./screenshot.png)
+![Screenshot](./screenshot-android.png)
+![Screenshot](./screenshot-fedora.png)
 
 ## Installation
 
@@ -16,4 +17,3 @@ This is a screenshot of the App running on Fedora Linux. But it also works seaml
 2. Clone Quicklogger: `git clone https://codeberg.org/snonux/quicklogger; cd quicklogger`
 3. Build it `./build.sh` - Note, you may need to set the `ANDROID_NDK_HOME` environment variable accordingly.
 4. Copy `quicklogger.apk` to your Android phone and install it (You may need to allow installing APKs from this source - just follow the instructions Android is prompting you with).
-
