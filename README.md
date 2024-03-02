@@ -1,4 +1,4 @@
-# quicklogger
+# Quick logger
 
 ![Quicklogger](./logo-small.png)
 
