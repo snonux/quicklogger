@@ -2,7 +2,7 @@
 
 ![Quicklogger](./logo-small.png)
 
-This is a tiny GUI app written in Go using the Fyne framework to quickly log a message to a file. ![Read on my blog at foo.zone more about this.](https://foo.zone/gemfeed/2024-03-03-a-fine-fyne-android-app-for-quickly-logging-ideas-programmed-in-golang.html)
+This is a tiny GUI app written in Go using the Fyne framework to quickly log a message to a file. Read on my blog more about this: https://foo.zone/gemfeed/2024-03-03-a-fine-fyne-android-app-for-quickly-logging-ideas-programmed-in-golang.html
 
 The purpose of this is to have a small Android app to quickly log Ideas into a folder as plain text files.  From there, Syncthing will sync it to my computer at home. 
 
