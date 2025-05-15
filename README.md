@@ -17,3 +17,17 @@ This are screenshots of the App running on Android and Fedora Linux.
 2. Clone Quicklogger: `git clone https://codeberg.org/snonux/quicklogger; cd quicklogger`
 3. Build it `./build.sh` - Note, you may need to set the `ANDROID_NDK_HOME` environment variable accordingly.
 4. Copy `quicklogger.apk` to your Android phone and install it (You may need to allow installing APKs from this source - just follow the instructions Android is prompting you with).
+
+## Not sure
+
+... not sure that the above is still required, but I now have to do this to complile this on Fedora Linux for Android:
+
+```sh
+sudo systemctl start podman
+DOCKER_HOST=unix:///run/user/1001/podman/podman.sock
+go install github.com/fyne-io/fyne-cross@latest
+fyne-cross android --pull
+fyne-cross android
+```
+
+And then install the `.apk` file.
