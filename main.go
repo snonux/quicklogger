@@ -21,10 +21,12 @@ const (
 var (
 	defaultDirectory = "."
 	defaultTagItems  = []string{
+		"infra",
 		"log",
 		"share",
 		"share:li",
 		"share:ma",
+		"share:no",
 		"track",
 		"track 10",
 		"track 15",
