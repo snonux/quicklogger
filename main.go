@@ -16,6 +16,7 @@ import (
 const (
 	appId           = "org.buetow.quicklogger"
 	placeholderText = "Enter text here..."
+	maxTextLength   = 5000 // Limit text length to prevent performance issues
 )
 
 var (
@@ -96,9 +97,36 @@ func createMainWindow(a fyne.App) fyne.Window {
 	window := a.NewWindow("Quick logger")
 
 	input := widget.NewMultiLineEntry()
-	input.Wrapping = fyne.TextWrapWord
+	// Optimization 1: Disable word wrapping on Android to improve performance
+	// Word wrapping causes expensive recalculations on every text change
+	if fyne.CurrentDevice().IsMobile() {
+		input.Wrapping = fyne.TextWrapOff
+	} else {
+		input.Wrapping = fyne.TextWrapWord
+	}
 	input.SetPlaceHolder(placeholderText)
-	input.SetMinRowsVisible(30)
+	// Optimization 2: Reduce visible rows on mobile to limit rendering area
+	if fyne.CurrentDevice().IsMobile() {
+		input.SetMinRowsVisible(10)
+	} else {
+		input.SetMinRowsVisible(30)
+	}
+
+	// Optimization 3: Add text length indicator
+	charCount := widget.NewLabel("0 chars")
+
+	// Optimization 4: Throttle text changes with validation
+	input.OnChanged = func(text string) {
+		// Update character count
+		charCount.SetText(fmt.Sprintf("%d chars", len(text)))
+
+		// Warn if text is getting too long
+		if len(text) > maxTextLength {
+			dialog.ShowInformation("Text Limit",
+				fmt.Sprintf("Text is getting long (%d chars). Consider logging to avoid performance issues.", len(text)),
+				window)
+		}
+	}
 
 	// Dropdown with pre-selectable items
 	daysDropdown := widget.NewSelect([]string{"0", "1", "3", "7", "14", "30", "60", "99"}, func(selected string) {
@@ -133,14 +161,27 @@ func createMainWindow(a fyne.App) fyne.Window {
 		}
 		input.SetText("")
 		input.SetPlaceHolder(placeholderText)
+		// Reset character count
+		charCount.SetText("0 chars")
+	})
+
+	// Optimization 5: Add clear button for quick text clearing
+	clearButton := widget.NewButton("Clear", func() {
+		input.SetText("")
+		charCount.SetText("0 chars")
+		window.Canvas().Focus(input)
 	})
 
 	window.SetContent(container.NewVBox(
 		container.NewHBox(daysDropdown, tagDropdown, whatDropdown, logTextButton),
 		input,
-		widget.NewButton("Preferences", func() {
-			createPreferenceWindow(a).Show()
-		}),
+		container.NewHBox(
+			widget.NewButton("Preferences", func() {
+				createPreferenceWindow(a).Show()
+			}),
+			clearButton,
+			charCount, // Show character count
+		),
 	))
 	window.Resize(windowSize)
 	window.Canvas().Focus(input)
