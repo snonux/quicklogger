@@ -11,23 +11,67 @@ This are screenshots of the App running on Android and Fedora Linux.
 ![Screenshot](./screenshot-android.png)
 ![Screenshot](./screenshot-fedora.png)
 
-## Installation
+## Build and Run (Mage)
 
-1. Download and install the Android NDK. I personally installed it to `~/android/android-ndk-r26b` as of this writing.
-2. Clone Quicklogger: `git clone https://codeberg.org/snonux/quicklogger; cd quicklogger`
-3. Build it `./build.sh` - Note, you may need to set the `ANDROID_NDK_HOME` environment variable accordingly.
-4. Copy `quicklogger.apk` to your Android phone and install it (You may need to allow installing APKs from this source - just follow the instructions Android is prompting you with).
+This repo includes Mage tasks to build, run and cross‑compile.
 
-## Not sure
-
-... not sure that the above is still required, but I now have to do this to complile this on Fedora Linux for Android:
+Install Mage:
 
 ```sh
-sudo systemctl start podman
-DOCKER_HOST=unix:///run/user/1001/podman/podman.sock
-go install github.com/fyne-io/fyne-cross@latest
-fyne-cross android --pull
-fyne-cross android
+go install github.com/magefile/mage@latest
 ```
 
-And then install the `.apk` file.
+Clone and enter the repo:
+
+```sh
+git clone https://codeberg.org/snonux/quicklogger
+cd quicklogger
+```
+
+Common tasks:
+
+```sh
+# Build desktop binary into ./bin
+mage build
+
+# Run the app (shows verbose Go build output)
+mage run
+
+# Clean build artifacts
+mage clean
+```
+
+## Android Builds
+
+Two options exist: local Fyne packaging or containerized cross‑compile.
+
+- Local packaging (requires Fyne CLI and Android NDK):
+
+  ```sh
+  # Install Fyne CLI if needed
+  go install fyne.io/fyne/v2/cmd/fyne@latest
+
+  # Ensure ANDROID_NDK_HOME points to your NDK (e.g. ~/android-ndk/android-ndk-r26b)
+  export ANDROID_NDK_HOME=~/android-ndk/android-ndk-r26b
+
+  # Build APK in the project root as quicklogger.apk
+  mage android
+  ```
+
+- Containerized cross‑compile (recommended, uses fyne-cross with Docker/Podman):
+
+  ```sh
+  # Start Podman if you prefer Podman over Docker
+  sudo systemctl start podman
+
+  # The task auto-detects a user Podman socket; otherwise it uses Docker defaults
+  mage androidcross
+  ```
+
+After cross‑compiling, the APK is located at `fyne-cross/dist/android/quicklogger.apk`.
+Copy it to your device and install it (you may need to allow installing from unknown sources):
+
+```sh
+adb install -r fyne-cross/dist/android/quicklogger.apk
+# or copy manually and install on device
+```

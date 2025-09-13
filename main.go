@@ -58,20 +58,20 @@ func createMainWindow(a fyne.App) fyne.Window {
 		input.Wrapping = fyne.TextWrapWord
 	}
 	input.SetPlaceHolder(placeholderText)
-	// Optimization 2: Reduce visible rows on mobile to limit rendering area
-	if fyne.CurrentDevice().IsMobile() {
-		input.SetMinRowsVisible(10)
-	} else {
-		input.SetMinRowsVisible(30)
-	}
+    // Optimization 2: Reduce visible rows on mobile to limit rendering area
+    if fyne.CurrentDevice().IsMobile() {
+        input.SetMinRowsVisible(10)
+    } else {
+        input.SetMinRowsVisible(30)
+    }
 
 	// Optimization 3: Add text length indicator
 	charCount := widget.NewLabel("0 chars")
 
-	// Optimization 4: Throttle text changes with validation
-	input.OnChanged = func(text string) {
-		// Update character count
-		charCount.SetText(fmt.Sprintf("%d chars", len(text)))
+    // Optimization 4: Throttle text changes with validation
+    input.OnChanged = func(text string) {
+        // Update character count
+        charCount.SetText(fmt.Sprintf("%d chars", len(text)))
 
 		// Warn if text is getting too long
 		if len(text) > maxTextLength {
@@ -96,12 +96,20 @@ func createMainWindow(a fyne.App) fyne.Window {
         charCount.SetText("0 chars")
     })
 
-	// Optimization 5: Add clear button for quick text clearing
-	clearButton := widget.NewButton("Clear", func() {
-		input.SetText("")
-		charCount.SetText("0 chars")
-		window.Canvas().Focus(input)
-	})
+    // Optimization 5: Add clear button for quick text clearing
+    clearButton := widget.NewButton("Clear", func() {
+        input.SetText("")
+        charCount.SetText("0 chars")
+        window.Canvas().Focus(input)
+    })
+
+    // If running on Android and shared text file exists, load it into the input
+    if fyne.CurrentDevice().IsMobile() {
+        if txt, err := readSharedFromCache(); err == nil && txt != "" {
+            input.SetText(txt)
+            charCount.SetText(fmt.Sprintf("%d chars", len(txt)))
+        }
+    }
 
     window.SetContent(container.NewVBox(
         input,
@@ -114,8 +122,19 @@ func createMainWindow(a fyne.App) fyne.Window {
             charCount, // Show character count
         ),
     ))
-	window.Resize(windowSize)
-	window.Canvas().Focus(input)
+    window.Resize(windowSize)
+    window.Canvas().Focus(input)
+
+    // On Android, also check for new shared text whenever app returns to foreground.
+    if lc := a.Lifecycle(); lc != nil {
+        lc.SetOnEnteredForeground(func() {
+            if txt, err := readSharedFromCache(); err == nil && txt != "" {
+                input.SetText(txt)
+                charCount.SetText(fmt.Sprintf("%d chars", len(txt)))
+                window.Canvas().Focus(input)
+            }
+        })
+    }
 
 	return window
 }
