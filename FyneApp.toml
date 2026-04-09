@@ -4,5 +4,5 @@ Website = "https://codeberg.org/snonux/quicklogger"
   Icon = "icon.png"
   Name = "quicklogger"
   ID = "org.buetow.quicklogger"
-  Version = "0.1.0"
-  Build = 55
+  Version = "0.1.1"
+  Build = 64
