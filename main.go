@@ -52,6 +52,44 @@ func prepareSharedTextLoad(text string, autoLog bool) (sharedTextLoadMode, strin
 	return sharedTextLoadPrefill, text, true
 }
 
+func clearSharedTextCache() {
+	if path := sharedTextCachePath(); path != "" {
+		_ = os.Remove(path)
+	}
+}
+
+func handleSharedTextLoad(
+	text string,
+	autoLog bool,
+	dir string,
+	prefill func(string),
+	focus func(),
+	resetInput func(),
+	clearCache func(),
+	logFn func(string, string) error,
+	showInfo func(string, string),
+	showError func(error),
+) {
+	mode, sharedText, ok := prepareSharedTextLoad(text, autoLog)
+	if !ok {
+		clearCache()
+		return
+	}
+	if mode == sharedTextLoadAutoLog {
+		if err := logFn(dir, sharedText); err != nil {
+			showError(err)
+			return
+		}
+		showInfo("Logged", "Shared text has been logged.")
+		resetInput()
+		clearCache()
+		return
+	}
+	prefill(sharedText)
+	focus()
+	clearCache()
+}
+
 // newInputWidget creates the multi-line text entry with platform-appropriate
 // wrapping and row count settings.
 func newInputWidget() *widget.Entry {
@@ -152,27 +190,29 @@ func createMainWindow(a fyne.App) fyne.Window {
 			}
 			return
 		}
-		mode, sharedText, ok := prepareSharedTextLoad(txt, a.Preferences().BoolWithFallback("AutoLogSharedText", false))
-		if !ok {
-			return
-		}
 		loadingSharedText = true
 		defer func() {
 			loadingSharedText = false
 		}()
-		if mode == sharedTextLoadAutoLog {
-			dir := a.Preferences().StringWithFallback("Directory", defaultDirectory)
-			if err := logEntry(dir, sharedText); err != nil {
+		handleSharedTextLoad(
+			txt,
+			a.Preferences().BoolWithFallback("AutoLogSharedText", false),
+			a.Preferences().StringWithFallback("Directory", defaultDirectory),
+			input.SetText,
+			func() {
+				window.Canvas().Focus(input)
+			},
+			resetInput,
+			clearSharedTextCache,
+			logEntry,
+			func(title, message string) {
+				dialog.ShowInformation(title, message, window)
+			},
+			func(err error) {
 				dialog.ShowError(err, window)
-				return
-			}
-			dialog.ShowInformation("Logged", "Shared text has been logged.", window)
-			resetInput()
-			return
-		}
-		input.SetText(sharedText)
-		charCount.SetText(fmt.Sprintf("%d chars", len(sharedText)))
-		window.Canvas().Focus(input)
+			},
+		)
+		charCount.SetText(fmt.Sprintf("%d chars", len(input.Text)))
 	}
 
 	if fyne.CurrentDevice().IsMobile() {

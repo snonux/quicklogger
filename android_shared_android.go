@@ -7,20 +7,20 @@ import (
 	"path/filepath"
 )
 
-// readSharedFromCache tries to read the shared text written by the Android activity.
-// The activity writes into getCacheDir()/quicklogger-shared.txt; on Go, os.TempDir()
-// maps to the same location in Android (app cache directory).
-func readSharedFromCache() (string, error) {
+// sharedTextCachePath returns the cache file used for Android share intents.
+func sharedTextCachePath() string {
 	dir, derr := os.UserCacheDir()
 	if derr != nil || dir == "" {
 		dir = os.TempDir()
 	}
-	path := filepath.Join(dir, "quicklogger-shared.txt")
-	b, err := os.ReadFile(path)
+	return filepath.Join(dir, "quicklogger-shared.txt")
+}
+
+// readSharedFromCache tries to read the shared text written by the Android activity.
+func readSharedFromCache() (string, error) {
+	b, err := os.ReadFile(sharedTextCachePath())
 	if err != nil {
 		return "", err
 	}
-	// best-effort cleanup; ignore errors
-	_ = os.Remove(path)
 	return string(b), nil
 }
