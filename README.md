@@ -75,3 +75,9 @@ Copy it to your device and install it (you may need to allow installing from unk
 adb install -r fyne-cross/dist/android/quicklogger.apk
 # or copy manually and install on device
 ```
+
+## Share with QuickLogger on Android
+
+From any Android app that can share text, choose **Share** and send it to QuickLogger. The text opens in the editor so you can review it, edit it, or tap **Log text**.
+
+If you want shared text to be saved immediately, open **Preferences** and enable **Auto-log shared text**. With that on, shared text goes straight to your log directory instead of being prefilled.
