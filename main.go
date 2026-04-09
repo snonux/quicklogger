@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -25,11 +26,30 @@ const defaultDirectory = "."
 
 var windowSize = fyne.NewSize(400, 100)
 
+type sharedTextLoadMode int
+
+const (
+	sharedTextLoadPrefill sharedTextLoadMode = iota
+	sharedTextLoadAutoLog
+)
+
 // logEntry writes text to a timestamped markdown file in dir.
 // Separates persistence logic from the UI so it can be tested independently.
 func logEntry(dir, text string) error {
 	filename := filepath.Join(dir, "ql-"+time.Now().Format("060102-150405")+".md")
 	return os.WriteFile(filename, []byte(text), 0o644)
+}
+
+// prepareSharedTextLoad validates shared text and decides whether to prefill
+// the editor or log the entry immediately.
+func prepareSharedTextLoad(text string, autoLog bool) (sharedTextLoadMode, string, bool) {
+	if strings.TrimSpace(text) == "" {
+		return sharedTextLoadPrefill, "", false
+	}
+	if autoLog {
+		return sharedTextLoadAutoLog, text, true
+	}
+	return sharedTextLoadPrefill, text, true
 }
 
 // newInputWidget creates the multi-line text entry with platform-appropriate
@@ -84,8 +104,13 @@ func createMainWindow(a fyne.App) fyne.Window {
 	// Track whether the length warning has been shown so we don't fire a
 	// modal dialog on every keystroke above the limit.
 	warnShown := false
+	loadingSharedText := false
 	input.OnChanged = func(text string) {
 		charCount.SetText(fmt.Sprintf("%d chars", len(text)))
+		if loadingSharedText {
+			warnShown = false
+			return
+		}
 		if len(text) > maxTextLength && !warnShown {
 			warnShown = true
 			dialog.ShowInformation("Text Limit",
@@ -127,11 +152,27 @@ func createMainWindow(a fyne.App) fyne.Window {
 			}
 			return
 		}
-		if txt != "" {
-			input.SetText(txt)
-			charCount.SetText(fmt.Sprintf("%d chars", len(txt)))
-			window.Canvas().Focus(input)
+		mode, sharedText, ok := prepareSharedTextLoad(txt, a.Preferences().BoolWithFallback("AutoLogSharedText", false))
+		if !ok {
+			return
 		}
+		loadingSharedText = true
+		defer func() {
+			loadingSharedText = false
+		}()
+		if mode == sharedTextLoadAutoLog {
+			dir := a.Preferences().StringWithFallback("Directory", defaultDirectory)
+			if err := logEntry(dir, sharedText); err != nil {
+				dialog.ShowError(err, window)
+				return
+			}
+			dialog.ShowInformation("Logged", "Shared text has been logged.", window)
+			resetInput()
+			return
+		}
+		input.SetText(sharedText)
+		charCount.SetText(fmt.Sprintf("%d chars", len(sharedText)))
+		window.Canvas().Focus(input)
 	}
 
 	if fyne.CurrentDevice().IsMobile() {

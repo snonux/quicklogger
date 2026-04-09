@@ -60,3 +60,56 @@ func TestLogEntryEmptyText(t *testing.T) {
 		t.Errorf("expected empty file, got %d bytes", len(content))
 	}
 }
+
+func TestPrepareSharedTextLoadSkipsWhitespaceOnly(t *testing.T) {
+	mode, text, ok := prepareSharedTextLoad("  \n\t  ", false)
+	if ok {
+		t.Fatal("expected whitespace-only text to be skipped")
+	}
+	if mode != sharedTextLoadPrefill {
+		t.Fatalf("expected prefill mode default, got %v", mode)
+	}
+	if text != "" {
+		t.Fatalf("expected empty text, got %q", text)
+	}
+}
+
+func TestPrepareSharedTextLoadPrefillMode(t *testing.T) {
+	mode, text, ok := prepareSharedTextLoad("hello", false)
+	if !ok {
+		t.Fatal("expected shared text to be accepted")
+	}
+	if mode != sharedTextLoadPrefill {
+		t.Fatalf("expected prefill mode, got %v", mode)
+	}
+	if text != "hello" {
+		t.Fatalf("expected original text, got %q", text)
+	}
+}
+
+func TestPrepareSharedTextLoadAutoLogMode(t *testing.T) {
+	mode, text, ok := prepareSharedTextLoad("hello", true)
+	if !ok {
+		t.Fatal("expected shared text to be accepted")
+	}
+	if mode != sharedTextLoadAutoLog {
+		t.Fatalf("expected auto-log mode, got %v", mode)
+	}
+	if text != "hello" {
+		t.Fatalf("expected original text, got %q", text)
+	}
+}
+
+func TestPrepareSharedTextLoadAllowsLongText(t *testing.T) {
+	text := strings.Repeat("x", maxTextLength+1)
+	mode, gotText, ok := prepareSharedTextLoad(text, true)
+	if !ok {
+		t.Fatal("expected long shared text to be accepted")
+	}
+	if mode != sharedTextLoadAutoLog {
+		t.Fatalf("expected auto-log mode, got %v", mode)
+	}
+	if gotText != text {
+		t.Fatalf("expected original text to be preserved, got %d bytes", len(gotText))
+	}
+}
