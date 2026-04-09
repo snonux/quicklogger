@@ -55,15 +55,19 @@ func createPreferenceWindow(a fyne.App) fyne.Window {
 	window := a.NewWindow("Preferences")
 	directoryPreference := widget.NewEntry()
 	directoryPreference.SetText(a.Preferences().StringWithFallback("Directory", defaultDirectory))
+	autoLogSharedTextPreference := widget.NewCheck("Auto-log shared text", nil)
+	autoLogSharedTextPreference.SetChecked(a.Preferences().BoolWithFallback("AutoLogSharedText", false))
 
 	window.SetContent(container.NewVBox(
 		container.NewVBox(
 			widget.NewLabel("Directory:"),
 			directoryPreference,
 		),
+		autoLogSharedTextPreference,
 		container.NewHBox(
 			widget.NewButton("Save", func() {
 				a.Preferences().SetString("Directory", directoryPreference.Text)
+				a.Preferences().SetBool("AutoLogSharedText", autoLogSharedTextPreference.Checked)
 				window.Hide()
 			}),
 		)))
