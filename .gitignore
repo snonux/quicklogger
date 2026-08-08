@@ -1,3 +1,5 @@
 fyne-cross
-quicklogger
 tmp-pkg
+bin/
+quicklogger.apk
+scripts/debug.keystore

@@ -78,6 +78,40 @@ adb install -r fyne-cross/dist/android/quicklogger.apk
 
 ## Share with QuickLogger on Android
 
+Fyne's build does not compile custom Java into the APK (its `classes.dex` is a
+pre-baked blob), and the main `GoNativeActivity` does not read `ACTION_SEND`
+intents. So share support is added by post-processing the built APK with a small
+`ShareActivity` that hands the shared text to the app via a cache file.
+
+The one-command build is `mage androidshare`, which builds the base APK via
+`androidcross` and then runs `scripts/patch-apk.sh` to merge in `ShareActivity`,
+add a `SEND` intent-filter to the manifest, and re-sign:
+
+```sh
+mage androidshare
+# Output: fyne-cross/dist/android/quicklogger-share.apk
+```
+
+IME suggestions (e.g. FUTO keyboard) are enabled by default — a partial fix
+(see caveats below). To disable them, set `SUGGESTIONS=0`:
+
+```sh
+SUGGESTIONS=0 mage androidshare
+```
+
+The patched APK is signed with a local debug key (`scripts/debug.keystore`,
+created on first run and gitignored), so uninstall any previously installed
+build first to avoid a signature conflict:
+
+```sh
+adb uninstall org.buetow.quicklogger
+adb install -r fyne-cross/dist/android/quicklogger-share.apk
+```
+
 From any Android app that can share text, choose **Share** and send it to QuickLogger. The text opens in the editor so you can review it, edit it, or tap **Log text**.
 
 If you want shared text to be saved immediately, open **Preferences** and enable **Auto-log shared text**. With that on, shared text goes straight to your log directory instead of being prefilled.
+
+> Note: enabling IME suggestions is partial. Fyne's Android text entry is a
+> hidden one-character `EditText` used as a keystroke conduit, and the IME
+> composing region is ignored, so inline suggestions may still misbehave.

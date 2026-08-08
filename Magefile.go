@@ -151,6 +151,29 @@ func AndroidCross() error {
 	return nil
 }
 
+// AndroidShare is the one-command Android build: it builds the base APK via
+// AndroidCross and then post-processes it (scripts/patch-apk.sh) to add
+// Android "Share" text-intent support — a small ShareActivity merged into
+// classes.dex plus a SEND intent-filter in the manifest, then re-signed.
+// Output: fyne-cross/dist/android/quicklogger-share.apk
+//
+// Set the SUGGESTIONS environment variable to "0" to disable IME suggestions
+// (enabled by default, a partial fix for FUTO keyboard; see
+// scripts/patch-apk.sh for caveats).
+//
+//	SUGGESTIONS=0 mage androidshare
+func AndroidShare() error {
+	if err := AndroidCross(); err != nil {
+		return err
+	}
+	env := map[string]string{"SUGGESTIONS": "1"}
+	if v := os.Getenv("SUGGESTIONS"); v != "" {
+		env["SUGGESTIONS"] = v
+	}
+	fmt.Printf("Post-processing APK to add Android share support (SUGGESTIONS=%s)\n", env["SUGGESTIONS"])
+	return sh.RunWithV(env, "./scripts/patch-apk.sh")
+}
+
 func newestAPK(dir string) (string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
