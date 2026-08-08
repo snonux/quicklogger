@@ -1,5 +1,14 @@
 # Quick logger
 
+> **Deprecation notice:** This app is **deprecated and no longer maintained.**
+> Please use [Quicklog](https://github.com/snonux/quicklog) instead.
+>
+> The reason is that Fyne (the UI toolkit used here) has notable limitations on
+> Android that make features like receiving shared text and keyboard
+> auto-suggestions awkward to support without fragile APK post-processing
+> (see [`docs/`](docs/)). The successor, Quicklog, avoids these Fyne-on-Android
+> limitations.
+
 ![Quicklogger](./logo-small.png)
 
 This is a tiny GUI app written in Go using the Fyne framework to quickly log a message to a file. Read on my blog more about this: https://foo.zone/gemfeed/2024-03-03-a-fine-fyne-android-app-for-quickly-logging-ideas-programmed-in-golang.html
