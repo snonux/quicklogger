@@ -99,19 +99,24 @@ IME suggestions (e.g. FUTO keyboard) are enabled by default — a partial fix
 SUGGESTIONS=0 mage androidshare
 ```
 
-The patched APK is signed with a local debug key (`scripts/debug.keystore`,
-created on first run and gitignored), so uninstall any previously installed
-build first to avoid a signature conflict:
+> Note: enabling IME suggestions is partial — see
+> [`docs/android-keyboard.md`](docs/android-keyboard.md) for why.
+>
+> If installing over an older build signed with a different key, uninstall first:
+> `adb uninstall org.buetow.quicklogger` (see [`docs/grapheneos-setup.md`](docs/grapheneos-setup.md)).
 
-```sh
-adb uninstall org.buetow.quicklogger
-adb install -r fyne-cross/dist/android/quicklogger-share.apk
-```
+To use it: from any app that can share text, choose **Share → QuickLogger**.
+The text opens in the editor to review/edit, then tap **Log text**. Enable
+**Preferences → Auto-log shared text** to skip the editor and save shared text
+directly to your log directory.
 
-From any Android app that can share text, choose **Share** and send it to QuickLogger. The text opens in the editor so you can review it, edit it, or tap **Log text**.
+## Documentation
 
-If you want shared text to be saved immediately, open **Preferences** and enable **Auto-log shared text**. With that on, shared text goes straight to your log directory instead of being prefilled.
-
-> Note: enabling IME suggestions is partial. Fyne's Android text entry is a
-> hidden one-character `EditText` used as a keystroke conduit, and the IME
-> composing region is ignored, so inline suggestions may still misbehave.
+- [`docs/android-share.md`](docs/android-share.md) — why share needs APK
+  post-processing and how `scripts/patch-apk.sh` works.
+- [`docs/android-keyboard.md`](docs/android-keyboard.md) — the FUTO/IME
+  suggestions fix and its limits.
+- [`docs/grapheneos-setup.md`](docs/grapheneos-setup.md) — storage scopes and
+  the "read-only filesystem" error.
+- [`docs/build-notes.md`](docs/build-notes.md) — `.gitignore`, build number, and
+  signing-key notes.
